@@ -121,7 +121,13 @@ def send_telegram(message):
             json={"chat_id": chat_id, "text": message},
             timeout=30,
         )
-        return response.json().get("ok") is True
+        result = response.json()
+        if not result.get("ok"):
+            description = str(result.get("description", "Unknown error"))
+            description = description.replace(token, "[hidden]")
+            description = description.replace(chat_id, "[hidden]")
+            print("Telegram rejected the message:", description)
+        return result.get("ok") is True
     except (requests.RequestException, ValueError):
         print("Telegram delivery failed.")
         return False
